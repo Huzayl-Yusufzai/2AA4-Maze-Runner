@@ -106,7 +106,7 @@ class Marker {
     }
 
     public void rightHandRule(){
-       while (mapValues[currentRow][currentCol]!= null){
+       while (isValidMove(currentRow, currentCol)){
             if (direction.equals("E")){
                 if (mapValues[currentRow-1][currentCol] == false){
                     if (mapValues[currentRow][currentCol+1] == false){
@@ -199,8 +199,14 @@ class Marker {
                 }
             }
        }
+       }
     }
 
+    private boolean isValidMove(int row, int col) {
+        return row >= 0 && row < mapValues[0].length 
+            && col >= 0 && col < mapValues.length 
+            && mapValues[col][row];
+    }
     public void addToPath(String direction){
         path = path.concat(direction);
     }
