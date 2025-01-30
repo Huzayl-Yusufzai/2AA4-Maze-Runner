@@ -1,9 +1,13 @@
 package ca.mcmaster.se2aa4.mazerunner;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
-import org.apache.commons.cli.*;
+
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -31,18 +35,19 @@ public class Main {
             String filePath = cmd.getOptionValue("i");
             logger.info("**** Reading the maze from file {}", filePath);
 
-            try {
+            try { //ERROR here
 
                 BufferedReader reader = new BufferedReader(new FileReader(filePath));
-                String line= "";
+                String line = "";
                 Map map = new Map(reader, line, filePath);
                 logger.info("**** Computing path");
-                map.initiateCheck();
-                
-            } catch(Exception e) {
-                System.err.println("/!\\ An error has occured /!\\");
+                map.catchStartnEnd();
+                System.out.println(map.initiateCheck());
+
+            } catch (Exception e) {
+                logger.error("/!\\ An error has occurred: {}", e.getMessage(), e);
             }
-        }  catch (ParseException e) {
+        } catch (ParseException e) {
             logger.error("Failed to parse command-line arguments: {}", e.getMessage());
             System.out.println("Usage: <File call> -i <path_to_maze_file>");
             return;
@@ -52,166 +57,194 @@ public class Main {
 }
 
 class Map {
+
     private boolean[][] mapValues;
     private int currentRow;
     private int currentCol;
+
+    private int endRow;
+    private int endCol;
 
     public Map(BufferedReader reader, String line, String filePath) {
         try {
             int row = 0;
-            while ((line = reader.readLine()) != null) {
-                for (int idx = 0; idx < line.length(); idx++) {
-                    if (line.charAt(idx) == '#') {
-                        mapValues[idx][row]= false;
-                    } else if (line.charAt(idx) == ' ') {
-                        mapValues[idx][row]= true;
-                    }
-                }
-                System.out.print(System.lineSeparator());
+            int cols = 0;
+
+            reader.mark(10000);
+
+            while ((line = reader.readLine()) != null) { //Allocating space for array
+                cols = Math.max(cols, line.length());
                 row++;
             }
-        } catch (Exception e){
-            System.err.println("/!\\ An error has occured /!\\");
+
+            mapValues = new boolean[cols][row];
+
+            reader.reset();
+            row = 0;
+
+            while ((line = reader.readLine()) != null) { //Populating with Boolean values according to text file
+                for (int idx = 0; idx < line.length(); idx++) {
+                    if (line.charAt(idx) == '#') {
+                        mapValues[row][idx] = false; //Wall
+                    } else if (line.charAt(idx) == ' ') {
+                        mapValues[row][idx] = true; //Path
+                    }
+                }
+                row++;
+            }
+        } catch (Exception e) {
+            System.out.println(e);
         }
     }
 
-    public void catchStart(){
+    public void catchStartnEnd() {
         for (int i = 0; i < mapValues.length; i++) {
-            if(mapValues[i][0] == true){
+            if (mapValues[i][0] == true) {
                 currentRow = i;
+                currentCol = 0;
                 break;
             }
         }
-        currentCol = 0;
+
+        for (int i = 0; i < mapValues.length; i++) {
+            if (mapValues[i][mapValues.length-1] == true) {
+                endRow = i;
+                endCol = mapValues.length-1;
+                return;
+            }
+        }
     }
 
-    public void initiateCheck(){
-        Marker marker = new Marker(currentRow, currentCol, mapValues);
+    public String initiateCheck() {
+        Marker marker = new Marker(currentRow, currentCol, mapValues, endRow, endCol);
         marker.rightHandRule();
-        System.out.println(marker.returnPath());
+        return marker.returnPath();
     }
-    
+
 }
+
 class Marker {
+
     private String path = "";
     private boolean[][] mapValues;
     private int currentRow;
     private int currentCol;
-    private String direction = "W";
 
-    public Marker(int row, int col, boolean[][] mapValues) {
+    private int endRow;
+    private int endCol;
+    private String direction = "E";
+
+    public Marker(int row, int col, boolean[][] mapValues, int endRow, int endCol) {
         currentRow = row;
         currentCol = col;
+        this.endRow = endRow;
+        this.endCol = endCol;
         this.mapValues = mapValues;
     }
 
-    public void rightHandRule(){
-       while (isValidMove(currentRow, currentCol)){
-            if (direction.equals("E")){
-                if (mapValues[currentRow-1][currentCol] == false){
-                    if (mapValues[currentRow][currentCol+1] == false){
-                        if (mapValues[currentRow+1][currentCol] == false){
-                            direction = "W";
-                            addToPath("LLLF");
-                            currentCol++;   
-                        } else {
-                            direction = "N";
-                            addToPath("LF");
-                            currentCol++;     
-                        }
-                    } else {
+    public void rightHandRule() {
+        while (true) {
+            System.out.println("Current Position: (" + currentRow + ", " + currentCol + ") | Direction: " + direction);
+            switch (direction) {
+                case "E": //When Facing East
+                    if (isValid(currentRow + 1, currentCol)) { //Checking SOUTH
+                        direction = "S";
+                        addToPath("RF");
+                        currentRow++;
+                    } else if (isValid(currentRow, currentCol + 1)) {//Checking EAST
                         direction = "E";
                         addToPath("F");
-                        currentCol++;    
+                        currentCol++;
+                    } else if (isValid(currentRow - 1, currentCol)) {//Checking NORTH
+                        direction = "N";
+                        addToPath("LF");
+                        currentRow--;
+                    } else { //GO WEST
+                        direction = "W";
+                        addToPath("RRF");
+                        currentCol--;
                     }
-                } else {
-                    direction = "S";
-                    addToPath("RF");
-                    currentRow--;
-                }
-            }
-            if (direction.equals("N")){
-                if (mapValues[currentRow][currentCol+1] == false){
-                    if (mapValues[currentRow+1][currentCol] == false){
-                        if (mapValues[currentRow][currentCol-1] == false){
-                            direction = "S";
-                            addToPath("LLLF");
-                            currentRow--;   
-                        } else {
-                            direction = "W";
-                            addToPath("LF");
-                            currentCol--;     
-                        }
-                    } else {
+                    break;
+
+                case "N": //When Facing NORTH
+                    if (isValid(currentRow, currentCol + 1)) { //Checking EAST
+                        direction = "E";
+                        addToPath("RF");
+                        currentCol++;
+                    } else if (isValid(currentRow - 1, currentCol)) {//Checking NORTH
                         direction = "N";
                         addToPath("F");
-                        currentRow++;    
-                    }
-                } else {
-                    direction = "E";
-                    addToPath("RF");
-                    currentCol++;
-                }
-            }
-            if (direction.equals("W")){
-                if (mapValues[currentRow+1][currentCol] == false){
-                    if (mapValues[currentRow][currentCol-1] == false){
-                        if (mapValues[currentRow-1][currentCol] == false){
-                            direction = "E";
-                            addToPath("LLLF");
-                            currentCol--;   
-                        } else {
-                            direction = "S";
-                            addToPath("LF");
-                            currentCol--;     
-                        }
-                    } else {
+                        currentRow--;
+                    } else if (isValid(currentRow, currentCol - 1)) {//Checking WEST
                         direction = "W";
-                        addToPath("F");
-                        currentCol--;    
+                        addToPath("LF");
+                        currentCol--;
+                    } else { //GO SOUTH
+                        direction = "S";
+                        addToPath("RRF");
+                        currentRow++;
                     }
-                } else {
-                    direction = "N";
-                    addToPath("RF");
-                    currentRow++;
-                }
-            if (direction.equals("S")){
-                if (mapValues[currentRow][currentCol-1] == false){
-                    if (mapValues[currentRow-1][currentCol] == false){
-                        if (mapValues[currentRow][currentCol+1] == false){
-                            direction = "N";
-                            addToPath("LLLF");
-                            currentRow++;   
-                        } else {
-                            direction = "W";
-                            addToPath("LF");
-                            currentCol++;     
-                        }
-                    } else {
+                    break;
+
+                case "S": //When Facing SOUTH
+                    if (isValid(currentRow, currentCol - 1)) {//Checking WEST
+                        direction = "W";
+                        addToPath("RF");
+                        currentCol--;
+                    } else if (isValid(currentRow + 1, currentCol)) {//Checing SOUTH
                         direction = "S";
                         addToPath("F");
-                        currentRow--;    
+                        currentRow++;
+                    } else if (isValid(currentRow, currentCol + 1)) { //Checking EAST
+                        direction = "E";
+                        addToPath("LF");
+                        currentCol++;
+                    } else if (isValid(currentRow-1, currentCol)){ //GO NORTH
+                        direction = "N";
+                        addToPath("RRF");
+                        currentRow--;
                     }
-                } else {
-                    direction = "W";
-                    addToPath("RF");
-                    currentCol--;
-                }
+                    break;
+                case "W": //When Facing WEST
+                    if (isValid(currentRow - 1, currentCol)) {//Checking NORTH
+                        direction = "N";
+                        addToPath("RF");
+                        currentRow--;
+                    } else if (isValid(currentRow, currentCol - 1)) {//Checking WEST
+                        direction = "W";
+                        addToPath("F");
+                        currentCol--;
+                    } else if (isValid(currentRow + 1, currentCol)) { //Checking SOUTH
+                        direction = "S";
+                        addToPath("LF");
+                        currentRow++;
+                    } else { //GO WEST
+                        direction = "E";
+                        addToPath("RRF");
+                        currentCol++;
+                    }
+                    break;
+
+            
             }
-       }
-       }
+
+            if (endCol == currentCol && endRow == currentRow){
+                break;
+            }
+        }
     }
 
-    private boolean isValidMove(int row, int col) {
-        return row >= 0 && row < mapValues[0].length 
-            && col >= 0 && col < mapValues.length 
-            && mapValues[col][row];
+    private boolean isValid(int row, int col) {
+        return row >= 0 && row < mapValues.length
+                && col >= 0 && col < mapValues[0].length
+                && mapValues[row][col];
     }
-    public void addToPath(String direction){
+
+    public void addToPath(String direction) {
         path = path.concat(direction);
     }
 
-    public String returnPath(){
+    public String returnPath() {
         return path;
     }
 }
