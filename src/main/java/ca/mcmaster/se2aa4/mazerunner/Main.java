@@ -20,32 +20,57 @@ public class Main {
 
         Options options = new Options();
         options.addOption("i", "input", true, "Maze input path");
+        options.addOption("p", "input", true, "Proposed Maze Solution");
 
         CommandLineParser parser = new DefaultParser();
         CommandLine cmd;
         try {
             cmd = parser.parse(options, args);
+            if (cmd.hasOption("i") && cmd.hasOption("p")){
 
-            if (!cmd.hasOption("i")) {
-                logger.error("-i flag required for input path");
-                System.out.println("Usage: <File call> -i <path_to_maze_file>");
-                return;
-            }
+                String filePath = cmd.getOptionValue("i");
+                logger.info("**** Reading the maze from file {}", filePath);
 
-            String filePath = cmd.getOptionValue("i");
-            logger.info("**** Reading the maze from file {}", filePath);
+                String userPath = cmd.getOptionValue("p");
+                logger.info("**** Useing '{}' as  input path", userPath);
 
-            try { //ERROR here
+                try {
 
-                BufferedReader reader = new BufferedReader(new FileReader(filePath));
-                String line = "";
-                Map map = new Map(reader, line, filePath);
-                logger.info("**** Computing path");
-                map.catchStartnEnd();
-                System.out.println(map.initiateCheck());
+                    BufferedReader reader = new BufferedReader(new FileReader(filePath));
+                    String line = "";
+                    Map map = new Map(reader, line, filePath);
+                    logger.info("**** Simulating Outcome");
+                    map.catchStartnEnd();
+                    map.createMarker();
+                    System.out.println();
 
-            } catch (Exception e) {
-                logger.error("/!\\ An error has occurred: {}", e.getMessage(), e);
+                } catch (Exception e) {
+                    logger.error("/!\\ An error has occurred: {}", e.getMessage(), e);
+                }
+
+            } else {
+                if (!cmd.hasOption("i")) {
+                    logger.error("-i flag required for input path");
+                    System.out.println("Usage: <File call> -i <path_to_maze_file>");
+                    return;
+                }
+
+                String filePath = cmd.getOptionValue("i");
+                logger.info("**** Reading the maze from file {}", filePath);
+
+                try {
+
+                    BufferedReader reader = new BufferedReader(new FileReader(filePath));
+                    String line = "";
+                    Map map = new Map(reader, line, filePath);
+                    logger.info("**** Computing path");
+                    map.catchStartnEnd();
+                    map.createMarker();
+                    System.out.println("East Entry: " + map.initiateCheck());
+
+                } catch (Exception e) {
+                    logger.error("/!\\ An error has occurred: {}", e.getMessage(), e);
+                }
             }
         } catch (ParseException e) {
             logger.error("Failed to parse command-line arguments: {}", e.getMessage());
@@ -61,7 +86,7 @@ class Map {
     private boolean[][] mapValues;
     private int currentRow;
     private int currentCol;
-
+    private Marker marker;
     private int endRow;
     private int endCol;
 
@@ -115,8 +140,11 @@ class Map {
         }
     }
 
+    public void createMarker(){
+        marker = new Marker(currentRow, currentCol, mapValues, endRow, endCol);
+    }
+
     public String initiateCheck() {
-        Marker marker = new Marker(currentRow, currentCol, mapValues, endRow, endCol);
         marker.rightHandRule();
         return marker.returnPath();
     }
@@ -144,7 +172,7 @@ class Marker {
 
     public void rightHandRule() {
         while (true) {
-            System.out.println("Current Position: (" + currentRow + ", " + currentCol + ") | Direction: " + direction);
+            //System.out.println("Current Position: (" + currentRow + ", " + currentCol + ") | Direction: " + direction);
             switch (direction) {
                 case "E": //When Facing East
                     if (isValid(currentRow + 1, currentCol)) { //Checking SOUTH
@@ -245,6 +273,31 @@ class Marker {
     }
 
     public String returnPath() {
+        path = factorize();
         return path;
     }
+
+    public String factorize(){
+        char[] splitPath = path.toCharArray();
+        char previous = splitPath[0];
+        String newFactorized="";
+        int counter = 0;
+        int index = 0;
+
+        for (char chars: splitPath){
+            if (previous !=chars){
+
+                newFactorized = (counter ==1 ) ? newFactorized.concat(String.valueOf(previous + " ")): newFactorized.concat(String.valueOf(counter)).concat(String.valueOf(previous + " "));
+                previous = chars;
+                counter=1;
+            } else {
+                counter++;
+            }
+            index++;
+        }
+        newFactorized = (counter ==1 ) ? newFactorized.concat(String.valueOf(previous + " ")): newFactorized.concat(String.valueOf(counter)).concat(String.valueOf(previous + " "));
+        return newFactorized;
+    }
+
+
 }
