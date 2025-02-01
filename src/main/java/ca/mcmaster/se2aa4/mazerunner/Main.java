@@ -17,8 +17,6 @@ public class Main {
     private static final Logger logger = LogManager.getLogger();
 
     public static void main(String[] args) {
-        logger.info("** Starting Maze Runner");
-
         //Add flag options to input
         Options options = new Options();
         options.addOption("i", "input", true, "Maze input path");
@@ -31,17 +29,13 @@ public class Main {
             if (cmd.hasOption("i") && cmd.hasOption("p")){ //If user path needs to be checked
 
                 String filePath = cmd.getOptionValue("i");
-                logger.info("**** Reading the maze from file {}", filePath);
-
                 String userPath = cmd.getOptionValue("p");
-                logger.info("**** Using '{}' as  input path", userPath);
 
                 try {
 
                     BufferedReader reader = new BufferedReader(new FileReader(filePath));
                     String line = "";
                     Map map = new Map(reader, line, filePath);
-                    logger.info("**** Simulating Outcome");
                     map.catchStartnEnd();
                     map.createMarker();
                     System.out.println("Input path is " + map.initiateCheck(userPath));
@@ -58,17 +52,14 @@ public class Main {
                 }
 
                 String filePath = cmd.getOptionValue("i");
-                logger.info("**** Reading the maze from file {}", filePath);
-
                 try {
 
                     BufferedReader reader = new BufferedReader(new FileReader(filePath));
                     String line = "";
                     Map map = new Map(reader, line, filePath);
-                    logger.info("**** Computing path");
                     map.catchStartnEnd();
                     map.createMarker();
-                    System.out.println("West Entry:");
+                    System.out.println("West entrance: ");
                     map.initiateSearch();
 
                 } catch (Exception e) {
@@ -80,7 +71,6 @@ public class Main {
             System.out.println("Usage: <File call> -i <path_to_maze_file>");
             return;
         }
-        logger.info("** End of Maze Runner");
     }
 }
 
