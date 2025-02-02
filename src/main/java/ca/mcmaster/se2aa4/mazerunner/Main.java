@@ -141,7 +141,7 @@ class Map { //Class to deal woth map data
     }
 
     public String initiateCheck(String userPath){ //Starts the verification if path needs to be checked
-        return marker.checkPath(userPath);
+        return marker.checkPath(marker.fac2Canonical(userPath));
     }
 
 }
@@ -294,6 +294,25 @@ class Marker { //Marker class which walks through the maze
         }
         newFactorized = (counter == 1 ) ? newFactorized.concat(String.valueOf(previous + " ")): newFactorized.concat(String.valueOf(counter)).concat(String.valueOf(previous + " "));
         return newFactorized;
+    }
+
+    public String fac2Canonical(String userInput){ //Turns factorized user input to canonical form for searching purposes
+        String[] token = userInput.split("");
+        String currentNum = "";
+        StringBuilder canonicalInput = new StringBuilder();
+        for (String tokens: token){
+            if (Character.isDigit(tokens.charAt(0))){
+                currentNum += tokens;
+            } else {
+                if (currentNum.isEmpty()){
+                    canonicalInput.append(tokens);
+                } else {
+                    canonicalInput.append(tokens.repeat(Integer.parseInt(currentNum)));
+                    currentNum = "";
+                }
+            }
+        }
+        return canonicalInput.toString();
     }
 
     public String checkPath(String userInput){ //Manager method for west to east and east to west checks
