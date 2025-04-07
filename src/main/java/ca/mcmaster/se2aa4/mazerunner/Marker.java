@@ -36,7 +36,7 @@ class Marker { // Marker class which walks through the maze
     }
 
     public String factorize() { // Factorizes the path
-        if (path == null || path.isEmpty()) {
+        if (path == null || path.length() == 0) {
             return "";
         }
 
@@ -279,14 +279,11 @@ class Marker { // Marker class which walks through the maze
         if (isValid(newRow, newCol)) {
             currentRow = newRow;
             currentCol = newCol;
-            path.concat("F");
-        } else {
-            // Handle invalid move (could throw an exception or log an error)
+            path = path.concat("F");
         }
     }
 
     public void turnLeft() {
-        // Update direction and record the turn
         switch (direction) {
             case "E":
                 direction = "N";
@@ -301,11 +298,10 @@ class Marker { // Marker class which walks through the maze
                 direction = "E";
                 break;
         }
-        path.concat("L");
+        path = path.concat("L");
     }
 
     public void turnRight() {
-        // Update direction and record the turn
         switch (direction) {
             case "E":
                 direction = "S";
@@ -320,6 +316,6 @@ class Marker { // Marker class which walks through the maze
                 direction = "E";
                 break;
         }
-        path.concat("R");
+        path = path.concat("R");
     }
 }
