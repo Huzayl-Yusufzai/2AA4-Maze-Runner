@@ -44,7 +44,6 @@ class Marker { // Marker class which walks through the maze
         char previous = splitPath[0];
         String newFactorized = "";
         int counter = 0;
-        int index = 0;
 
         for (char chars : splitPath) {
             if (previous != chars) {
@@ -55,7 +54,6 @@ class Marker { // Marker class which walks through the maze
             } else {
                 counter++;
             }
-            index++;
         }
         newFactorized = (counter == 1) ? newFactorized.concat(String.valueOf(previous + " "))
                 : newFactorized.concat(String.valueOf(counter)).concat(String.valueOf(previous + " "));

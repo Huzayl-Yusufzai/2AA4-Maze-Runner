@@ -15,11 +15,11 @@ public class MapTest {
         String filePath = "examples/tiny.maz.txt";
         BufferedReader reader = new BufferedReader(new FileReader(filePath));
         map = new Map(reader, "", filePath);
+        map.catchStartnEnd();
     }
 
     @Test
     public void testLoadTinyMazeFile() {
-        map.catchStartnEnd();
         map.createMarker();
 
         boolean[][] mazeValues = map.getMapValues();
@@ -35,7 +35,6 @@ public class MapTest {
 
     @Test
     public void testRunAlgTinyMazeFile() {
-        map.catchStartnEnd();
         map.runAlg();
         map.initiateSearch();
         assertNotNull(map.getMapValues());
