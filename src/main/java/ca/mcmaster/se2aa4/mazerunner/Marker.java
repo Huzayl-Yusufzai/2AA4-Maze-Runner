@@ -26,10 +26,6 @@ class Marker { // Marker class which walks through the maze
                 && mapValues[row][col];
     }
 
-    public void addToPath(String direction) { // Adds steps to path
-        path = path.concat(direction);
-    }
-
     public String returnCanonicalPath() { // Returns canonized path
         return path;
     }
@@ -40,6 +36,10 @@ class Marker { // Marker class which walks through the maze
     }
 
     public String factorize() { // Factorizes the path
+        if (path == null || path.isEmpty()) {
+            return "";
+        }
+
         char[] splitPath = path.toCharArray();
         char previous = splitPath[0];
         String newFactorized = "";
@@ -241,5 +241,85 @@ class Marker { // Marker class which walks through the maze
         } else {
             return false;
         }
+    }
+
+    public int getCurrentRow() {
+        return currentRow;
+    }
+
+    public int getCurrentCol() {
+        return currentCol;
+    }
+
+    public String getDirection() {
+        return direction;
+    }
+
+    public boolean atEnd() {
+        return currentRow == endRow && currentCol == endCol;
+    }
+
+    public void moveForward() {
+        int newRow = currentRow;
+        int newCol = currentCol;
+        switch (direction) {
+            case "E":
+                newCol++;
+                break;
+            case "W":
+                newCol--;
+                break;
+            case "N":
+                newRow--;
+                break;
+            case "S":
+                newRow++;
+                break;
+        }
+        if (isValid(newRow, newCol)) {
+            currentRow = newRow;
+            currentCol = newCol;
+            path.concat("F");
+        } else {
+            // Handle invalid move (could throw an exception or log an error)
+        }
+    }
+
+    public void turnLeft() {
+        // Update direction and record the turn
+        switch (direction) {
+            case "E":
+                direction = "N";
+                break;
+            case "N":
+                direction = "W";
+                break;
+            case "W":
+                direction = "S";
+                break;
+            case "S":
+                direction = "E";
+                break;
+        }
+        path.concat("L");
+    }
+
+    public void turnRight() {
+        // Update direction and record the turn
+        switch (direction) {
+            case "E":
+                direction = "S";
+                break;
+            case "S":
+                direction = "W";
+                break;
+            case "W":
+                direction = "N";
+                break;
+            case "N":
+                direction = "E";
+                break;
+        }
+        path.concat("R");
     }
 }

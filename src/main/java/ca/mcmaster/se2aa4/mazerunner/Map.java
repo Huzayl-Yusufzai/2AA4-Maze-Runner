@@ -11,7 +11,6 @@ class Map { // Class to deal woth map data
     private int currentCol;
     private int endRow;
     private int endCol;
-    private RightHand alg;
     private Marker marker;
 
     public Map(BufferedReader reader, String line, String filePath) {
@@ -65,12 +64,14 @@ class Map { // Class to deal woth map data
     }
 
     public void runAlg() { // Creates a marke and runs right hand rule for the map
-        alg = new RightHand(currentRow, currentCol, mapValues, endRow, endCol);
+        createMarker();
+        MazeAlg solver = new RightHand(marker);
+        solver.solve();
     }
 
     public void initiateSearch() { // States the path if it needs to be determined
-        System.out.println("    Canonical: " + alg.returnCanonicalPath());
-        System.out.println("    Factorized: " + alg.returnFactorizedPath());
+        System.out.println("    Canonical: " + marker.returnCanonicalPath());
+        System.out.println("    Factorized: " + marker.returnFactorizedPath());
     }
 
     public String initiateCheck(String userPath) { // Starts the verification if path needs to be checked

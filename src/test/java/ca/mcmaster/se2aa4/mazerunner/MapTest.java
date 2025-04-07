@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.StringReader;
 
 public class MapTest {
 
@@ -35,8 +36,19 @@ public class MapTest {
 
     @Test
     public void testRunAlgTinyMazeFile() {
-        map.runAlg();
-        map.initiateSearch();
-        assertNotNull(map.getMapValues());
+        String mazeString = "XXX\n" +
+                "XXX\n" +
+                "XXX";
+        BufferedReader reader = new BufferedReader(new StringReader(mazeString));
+        Map testMap = new Map(reader, mazeString, "dummyPath");
+        testMap.catchStartnEnd();
+
+        testMap.runAlg();
+        testMap.initiateSearch();
+
+        boolean[][] mazeValues = testMap.getMapValues();
+        assertNotNull(mazeValues, "Maze values should be initialized");
+        assertEquals(3, mazeValues.length, "Maze should have 3 rows");
+        assertEquals(3, mazeValues[0].length, "Maze should have 3 columns");
     }
 }

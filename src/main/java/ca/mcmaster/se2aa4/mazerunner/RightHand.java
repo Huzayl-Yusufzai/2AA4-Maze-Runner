@@ -1,99 +1,119 @@
 package ca.mcmaster.se2aa4.mazerunner;
 
-class RightHand extends Marker { // New class which extends marker to perform algorithem
+class RightHand implements MazeAlg {
 
-    public RightHand(int row, int col, boolean[][] mapValues, int endRow, int endCol) {
-        super(row, col, mapValues, endRow, endCol);
-        rightHandRule();
+    private Marker marker;
 
+    public RightHand(Marker marker) {
+        this.marker = marker;
     }
 
-    public void rightHandRule() { // Right hand rule
-        while (true) {
+    @Override
+    public void solve() {
+        while (!marker.atEnd()) {
+            Command command = null;
+            int currRow = marker.getCurrentRow();
+            int currCol = marker.getCurrentCol();
+            String direction = marker.getDirection();
+
             switch (direction) {
-                case "E": // When Facing East
-                    if (isValid(currentRow + 1, currentCol)) { // Checking SOUTH
-                        direction = "S";
-                        super.addToPath("RF");
-                        currentRow++;
-                    } else if (isValid(currentRow, currentCol + 1)) {// Checking EAST
-                        direction = "E";
-                        super.addToPath("F");
-                        currentCol++;
-                    } else if (isValid(currentRow - 1, currentCol)) {// Checking NORTH
-                        direction = "N";
-                        super.addToPath("LF");
-                        currentRow--;
-                    } else { // GO WEST
-                        direction = "W";
-                        super.addToPath("RRF");
-                        currentCol--;
+                case "E":
+                    if (marker.isValid(currRow + 1, currCol)) { // Check SOUTH
+                        command = new RightCommand(marker);
+                        command.execute();
+                        command = new ForwardCommand(marker);
+                        command.execute();
+                    } else if (marker.isValid(currRow, currCol + 1)) { // Check EAST
+                        command = new ForwardCommand(marker);
+                        command.execute();
+                    } else if (marker.isValid(currRow - 1, currCol)) { // Check NORTH
+                        command = new LeftCommand(marker);
+                        command.execute();
+                        command = new ForwardCommand(marker);
+                        command.execute();
+                    } else { // Go WEST
+                        command = new RightCommand(marker);
+                        command.execute();
+                        command = new RightCommand(marker);
+                        command.execute();
+                        command = new ForwardCommand(marker);
+                        command.execute();
                     }
                     break;
 
-                case "N": // When Facing NORTH
-                    if (isValid(currentRow, currentCol + 1)) { // Checking EAST
-                        direction = "E";
-                        super.addToPath("RF");
-                        currentCol++;
-                    } else if (isValid(currentRow - 1, currentCol)) {// Checking NORTH
-                        direction = "N";
-                        super.addToPath("F");
-                        currentRow--;
-                    } else if (isValid(currentRow, currentCol - 1)) {// Checking WEST
-                        direction = "W";
-                        super.addToPath("LF");
-                        currentCol--;
-                    } else { // GO SOUTH
-                        direction = "S";
-                        super.addToPath("RRF");
-                        currentRow++;
+                case "N":
+                    if (marker.isValid(currRow, currCol + 1)) { // Check EAST
+                        command = new RightCommand(marker);
+                        command.execute();
+                        command = new ForwardCommand(marker);
+                        command.execute();
+                    } else if (marker.isValid(currRow - 1, currCol)) { // Check NORTH
+                        command = new ForwardCommand(marker);
+                        command.execute();
+                    } else if (marker.isValid(currRow, currCol - 1)) { // Check WEST
+                        command = new LeftCommand(marker);
+                        command.execute();
+                        command = new ForwardCommand(marker);
+                        command.execute();
+                    } else { // Go SOUTH
+                        command = new RightCommand(marker);
+                        command.execute();
+                        command = new RightCommand(marker);
+                        command.execute();
+                        command = new ForwardCommand(marker);
+                        command.execute();
                     }
                     break;
 
-                case "S": // When Facing SOUTH
-                    if (isValid(currentRow, currentCol - 1)) {// Checking WEST
-                        direction = "W";
-                        super.addToPath("RF");
-                        currentCol--;
-                    } else if (isValid(currentRow + 1, currentCol)) {// Checing SOUTH
-                        direction = "S";
-                        super.addToPath("F");
-                        currentRow++;
-                    } else if (isValid(currentRow, currentCol + 1)) { // Checking EAST
-                        direction = "E";
-                        super.addToPath("LF");
-                        currentCol++;
-                    } else if (isValid(currentRow - 1, currentCol)) { // GO NORTH
-                        direction = "N";
-                        super.addToPath("RRF");
-                        currentRow--;
-                    }
-                    break;
-                case "W": // When Facing WEST
-                    if (isValid(currentRow - 1, currentCol)) {// Checking NORTH
-                        direction = "N";
-                        super.addToPath("RF");
-                        currentRow--;
-                    } else if (isValid(currentRow, currentCol - 1)) {// Checking WEST
-                        direction = "W";
-                        super.addToPath("F");
-                        currentCol--;
-                    } else if (isValid(currentRow + 1, currentCol)) { // Checking SOUTH
-                        direction = "S";
-                        super.addToPath("LF");
-                        currentRow++;
-                    } else { // GO EAST
-                        direction = "E";
-                        super.addToPath("RRF");
-                        currentCol++;
+                case "S":
+                    if (marker.isValid(currRow, currCol - 1)) { // Check WEST
+                        command = new RightCommand(marker);
+                        command.execute();
+                        command = new ForwardCommand(marker);
+                        command.execute();
+                    } else if (marker.isValid(currRow + 1, currCol)) { // Check SOUTH
+                        command = new ForwardCommand(marker);
+                        command.execute();
+                    } else if (marker.isValid(currRow, currCol + 1)) { // Check EAST
+                        command = new LeftCommand(marker);
+                        command.execute();
+                        command = new ForwardCommand(marker);
+                        command.execute();
+                    } else { // Go NORTH
+                        command = new RightCommand(marker);
+                        command.execute();
+                        command = new RightCommand(marker);
+                        command.execute();
+                        command = new ForwardCommand(marker);
+                        command.execute();
                     }
                     break;
 
-            }
-            if (endCol == currentCol && endRow == currentRow) {
-                break;
+                case "W":
+                    if (marker.isValid(currRow - 1, currCol)) { // Check NORTH
+                        command = new RightCommand(marker);
+                        command.execute();
+                        command = new ForwardCommand(marker);
+                        command.execute();
+                    } else if (marker.isValid(currRow, currCol - 1)) { // Check WEST
+                        command = new ForwardCommand(marker);
+                        command.execute();
+                    } else if (marker.isValid(currRow + 1, currCol)) { // Check SOUTH
+                        command = new LeftCommand(marker);
+                        command.execute();
+                        command = new ForwardCommand(marker);
+                        command.execute();
+                    } else { // Go EAST
+                        command = new RightCommand(marker);
+                        command.execute();
+                        command = new RightCommand(marker);
+                        command.execute();
+                        command = new ForwardCommand(marker);
+                        command.execute();
+                    }
+                    break;
             }
         }
     }
+
 }
